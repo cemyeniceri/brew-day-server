@@ -33,7 +33,7 @@ public class AuthenticationFilter extends GenericFilterBean {
         }
 
         final String path = ((HttpServletRequest) req).getRequestURI();
-        if (path.startsWith("/users")) {
+        if (path.startsWith("/principals")) {
             LOG.info("Jwt filter disabled for login request");
             chain.doFilter(req, res);
             return;
