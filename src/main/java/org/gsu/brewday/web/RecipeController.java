@@ -115,9 +115,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/posts/{postObjId}")
-    public ResponseEntity<RecipePostInfo> recipePostByObjId(@PathVariable("objId") String objId, @PathVariable("postObjId") String postObjId) throws BrewDayException {
+    public ResponseEntity<RecipePostInfo> recipePostByObjId(@PathVariable("recipeObjId") String recipeObjId, @PathVariable("postObjId") String postObjId) throws BrewDayException {
         LOG.info("Getting RecipePost by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipePost> recipePostList = recipe.getRecipePosts().stream().filter(t-> t.getObjId().equals(postObjId)).collect(Collectors.toList());
         if (!recipePostList.isEmpty())
@@ -126,9 +126,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{recipeObjId}/posts")
-    public ResponseEntity<ResponseInfo> createRecipePostByObjId(@PathVariable("objId") String objId, @RequestBody RecipePost recipePost) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> createRecipePostByObjId(@PathVariable("recipeObjId") String recipeObjId, @RequestBody RecipePost recipePost) throws BrewDayException {
         LOG.info("Creating RecipePost by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         recipePost.setRecipe(recipeDb);
         recipeDb.getRecipePosts().add(recipePost);
@@ -137,9 +137,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{recipeObjId}/posts")
-    public ResponseEntity<ResponseInfo> updateRecipePostByObjId(@PathVariable("objId") String objId, @RequestBody RecipePost recipePost) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> updateRecipePostByObjId(@PathVariable("recipeObjId") String recipeObjId, @RequestBody RecipePost recipePost) throws BrewDayException {
         LOG.info("Updating RecipePost by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipePost> recipePostList = recipeDb.getRecipePosts().stream().filter(t-> t.getObjId().equals(recipePost.getObjId())).collect(Collectors.toList());
         if (!recipePostList.isEmpty()){
@@ -151,9 +151,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{recipeObjId}/posts/{postObjId}")
-    public ResponseEntity<ResponseInfo> deleteRecipePostByObjId(@PathVariable("objId") String objId, @PathVariable("postObjId") String postObjId) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> deleteRecipePostByObjId(@PathVariable("recipeObjId") String recipeObjId, @PathVariable("postObjId") String postObjId) throws BrewDayException {
         LOG.info("Deleting RecipePost by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipePost> recipePostList = recipeDb.getRecipePosts().stream().filter(t-> t.getObjId().equals(postObjId)).collect(Collectors.toList());
         if (!recipePostList.isEmpty()){
@@ -176,9 +176,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/ingredients/{ingredientObjId}")
-    public ResponseEntity<IngredientInfo> recipeIngredientByObjId(@PathVariable("objId") String objId, @PathVariable("ingredientObjId") String ingredientObjId) throws BrewDayException {
+    public ResponseEntity<IngredientInfo> recipeIngredientByObjId(@PathVariable("recipeObjId") String recipeObjId, @PathVariable("ingredientObjId") String ingredientObjId) throws BrewDayException {
         LOG.info("Getting Recipe Ingredient by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipeIngredient> recipeIngredientList = recipe.getRecipeIngredients().stream().filter(t-> t.getObjId().equals(ingredientObjId)).collect(Collectors.toList());
         if (!recipeIngredientList.isEmpty())
@@ -187,9 +187,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{recipeObjId}/ingredients")
-    public ResponseEntity<ResponseInfo> createRecipeIngredientByObjId(@PathVariable("objId") String objId, @RequestBody RecipeIngredient recipeIngredient) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> createRecipeIngredientByObjId(@PathVariable("recipeObjId") String recipeObjId, @RequestBody RecipeIngredient recipeIngredient) throws BrewDayException {
         LOG.info("Creating Recipe Ingredient by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         recipeIngredient.setRecipe(recipeDb);
         recipeDb.getRecipeIngredients().add(recipeIngredient);
@@ -198,9 +198,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{recipeObjId}/ingredients")
-    public ResponseEntity<ResponseInfo> updateRecipeIngredientByObjId(@PathVariable("objId") String objId, @RequestBody RecipeIngredient recipeIngredient) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> updateRecipeIngredientByObjId(@PathVariable("recipeObjId") String recipeObjId, @RequestBody RecipeIngredient recipeIngredient) throws BrewDayException {
         LOG.info("Updating Recipe Ingredient by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipeIngredient> recipeIngredientList = recipeDb.getRecipeIngredients().stream().filter(t-> t.getObjId().equals(recipeIngredient.getObjId())).collect(Collectors.toList());
         if (!recipeIngredientList.isEmpty()){
@@ -216,9 +216,9 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{recipeObjId}/ingredients/{ingredientObjId}")
-    public ResponseEntity<ResponseInfo> deleteRecipeIngredientByObjId(@PathVariable("objId") String objId, @PathVariable("ingredientObjId") String ingredientObjId) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> deleteRecipeIngredientByObjId(@PathVariable("recipeObjId") String recipeObjId, @PathVariable("ingredientObjId") String ingredientObjId) throws BrewDayException {
         LOG.info("Deleting Recipe Ingredient by ObjId");
-        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipeIngredient> recipeIngredientList = recipeDb.getRecipeIngredients().stream().filter(t-> t.getObjId().equals(ingredientObjId)).collect(Collectors.toList());
         if (!recipeIngredientList.isEmpty()){
