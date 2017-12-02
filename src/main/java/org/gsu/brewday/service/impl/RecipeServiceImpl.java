@@ -3,6 +3,7 @@ package org.gsu.brewday.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.gsu.brewday.domain.Recipe;
 import org.gsu.brewday.domain.repository.RecipeRepository;
+import org.gsu.brewday.exception.BrewDayException;
 import org.gsu.brewday.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,10 @@ public class RecipeServiceImpl implements RecipeService {
 
     @Override
     public Recipe saveOrUpdate(Recipe recipe) {
-//        Optional<Recipe> ingredientDb = recipeRepository.findByTypeAndNameAndPrincipal(ingredient.getType(), ingredient.getName(), ingredient.getPrincipal());
-//        if(ingredientDb.isPresent() && !ingredientDb.get().getObjId().equals(ingredient.getObjId())) {
-//            throw new BrewDayException("Type and name must be unique for " + ingredient.getPrincipal().getUsername() + ". ");
-//        }
+        Optional<Recipe> ingredientDb = recipeRepository.findByNameAndPrincipal(recipe.getName(), recipe.getPrincipal());
+        if(ingredientDb.isPresent() && !ingredientDb.get().getObjId().equals(recipe.getObjId())) {
+            throw new BrewDayException("Name must be unique for " + recipe.getPrincipal().getUsername() + ". ");
+        }
         return recipeRepository.save(recipe);
     }
 
