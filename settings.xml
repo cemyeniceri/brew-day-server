@@ -47,7 +47,7 @@
     <!-- Gmail password : brewdaygsu17-->
 <servers> 
     <server> 
-      <id>maven.oracle.com </id> 
+      <id>maven.oracle.com</id>
       <username>brewdaygsu@gmail.com</username>
       <password>Brewdaygsu17</password>
        <configuration>
@@ -56,16 +56,16 @@
            <port>ANY</port>
            <realm>OAM 11g </realm>
          </basicAuthScope>
-	 <httpConfiguration>
-	   <all>
-             <params>
-               <property>
-		 <name>http.protocol.allow-circular-redirects </name>
-		 <value>%b,true </value>
-	       </property>
-	     </params>
-	   </all>
-	 </httpConfiguration>
+           <httpConfiguration>
+               <all>
+                   <params>
+                       <property>
+                           <name>http.protocol.allow-circular-redirects</name>
+                           <value>%b,true </value>
+                       </property>
+                   </params>
+               </all>
+           </httpConfiguration>
        </configuration>
     </server> 
   </servers>

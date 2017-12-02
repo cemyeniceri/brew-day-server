@@ -7,10 +7,10 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by cyeniceri on 04/02/2017.
@@ -45,4 +45,7 @@ public class Principal extends AbstractEntity implements Serializable {
 
     @Column(name = "GSM")
     private String gsm;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "principal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Ingredient> ingredients = new HashSet<>();
 }
