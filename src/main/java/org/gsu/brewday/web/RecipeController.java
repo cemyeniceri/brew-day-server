@@ -102,7 +102,7 @@ public class RecipeController {
         return new ResponseEntity(new ResponseInfo("Recipe is Deleted Successfully", ResponseStatus.SUCCESS), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/posts/")
+    @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/posts")
     public ResponseEntity<List<RecipePostInfo>> recipePostList(final @PathVariable("recipeObjId") String recipeObjId) throws BrewDayException {
         Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
         Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
@@ -124,7 +124,7 @@ public class RecipeController {
         throw new BrewDayException("Post is Not Found", HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/{recipeObjId}/posts/")
+    @RequestMapping(method = RequestMethod.POST, value = "/{recipeObjId}/posts")
     public ResponseEntity<IngredientInfo> createRecipePostByObjId(@PathVariable("objId") String objId, @RequestBody RecipePost recipePost) throws BrewDayException {
         LOG.info("Creating RecipePost by ObjId");
         Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
@@ -135,7 +135,7 @@ public class RecipeController {
         return new ResponseEntity(new ResponseInfo("Recipe Post is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/{recipeObjId}/posts/")
+    @RequestMapping(method = RequestMethod.PUT, value = "/{recipeObjId}/posts")
     public ResponseEntity<IngredientInfo> updateRecipePostByObjId(@PathVariable("objId") String objId, @RequestBody RecipePost recipePost) throws BrewDayException {
         LOG.info("Updating RecipePost by ObjId");
         Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
