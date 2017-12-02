@@ -2,7 +2,7 @@ package org.gsu.brewday.domain;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.Data;
+import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SelectBeforeUpdate;
@@ -13,7 +13,10 @@ import java.io.Serializable;
 /**
  * Created by cyeniceri on 01/12/2017.
  */
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(callSuper = true, exclude = "principal")
+@ToString(exclude = "principal", callSuper = true)
 @Entity
 @DynamicUpdate
 @DynamicInsert
