@@ -11,7 +11,6 @@ public class PrincipalInfo implements Serializable{
     private String title;
     private String name;
     private String surname;
-    private String userStatus;
     private String gsm;
     private String objId;
     private String username;
