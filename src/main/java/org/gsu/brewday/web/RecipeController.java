@@ -4,9 +4,8 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.gsu.brewday.domain.Principal;
 import org.gsu.brewday.domain.Recipe;
-import org.gsu.brewday.dto.response.IngredientInfo;
-import org.gsu.brewday.dto.response.RecipeInfo;
-import org.gsu.brewday.dto.response.ResponseInfo;
+import org.gsu.brewday.domain.RecipePost;
+import org.gsu.brewday.dto.response.*;
 import org.gsu.brewday.dto.response.ResponseStatus;
 import org.gsu.brewday.exception.BrewDayException;
 import org.gsu.brewday.service.PrincipalService;
@@ -25,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by cyeniceri on 02/12/2017.
@@ -40,7 +40,6 @@ public class RecipeController {
     private final PrincipalService principalService;
     private final ModelMapper modelMapper;
 
-
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<RecipeInfo>> recipeList(final HttpServletRequest request) throws BrewDayException {
         final Claims claims = (Claims) request.getAttribute("claims");
@@ -55,7 +54,7 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{objId}")
-    public ResponseEntity<IngredientInfo> ingredientByObjId(@PathVariable("objId") String objId) throws BrewDayException {
+    public ResponseEntity<IngredientInfo> recipeByObjId(@PathVariable("objId") String objId) throws BrewDayException {
         LOG.info("Getting Recipe by ObjId");
         Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
         Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
@@ -102,4 +101,66 @@ public class RecipeController {
         recipeService.delete(recipeDb);
         return new ResponseEntity(new ResponseInfo("Recipe is Deleted Successfully", ResponseStatus.SUCCESS), HttpStatus.OK);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/posts/")
+    public ResponseEntity<List<RecipePostInfo>> recipePostList(final @PathVariable("recipeObjId") String recipeObjId) throws BrewDayException {
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
+        Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+        LOG.info("Listing posts by recipe.");
+        Type listType = new TypeToken<List<RecipePostInfo>>() {
+        }.getType();
+        List<RecipePostInfo> recipePostInfoList = modelMapper.map(recipe.getRecipePosts(), listType);
+        return new ResponseEntity<>(recipePostInfoList, HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/posts/{postObjId}")
+    public ResponseEntity<IngredientInfo> recipePostByObjId(@PathVariable("objId") String objId, @PathVariable("postObjId") String postObjId) throws BrewDayException {
+        LOG.info("Getting RecipePost by ObjId");
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+        List<RecipePost> recipePostList = recipe.getRecipePosts().stream().filter(t-> t.getObjId().equals(postObjId)).collect(Collectors.toList());
+        if (!recipePostList.isEmpty())
+            return new ResponseEntity(modelMapper.map(recipePostList.get(0), RecipeInfo.class), HttpStatus.OK);
+        throw new BrewDayException("Post is Not Found", HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{recipeObjId}/posts/")
+    public ResponseEntity<IngredientInfo> createRecipePostByObjId(@PathVariable("objId") String objId, @RequestBody RecipePost recipePost) throws BrewDayException {
+        LOG.info("Creating RecipePost by ObjId");
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+        recipePost.setRecipe(recipeDb);
+        recipeDb.getRecipePosts().add(recipePost);
+        recipeService.saveOrUpdate(recipeDb);
+        return new ResponseEntity(new ResponseInfo("Recipe Post is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/{recipeObjId}/posts/")
+    public ResponseEntity<IngredientInfo> updateRecipePostByObjId(@PathVariable("objId") String objId, @RequestBody RecipePost recipePost) throws BrewDayException {
+        LOG.info("Updating RecipePost by ObjId");
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+        List<RecipePost> recipePostList = recipeDb.getRecipePosts().stream().filter(t-> t.getObjId().equals(recipePost.getObjId())).collect(Collectors.toList());
+        if (!recipePostList.isEmpty()){
+            recipePostList.get(0).setPost(recipePost.getPost());
+            recipeService.saveOrUpdate(recipeDb);
+            return new ResponseEntity(new ResponseInfo("Recipe Post is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
+        }
+        throw new BrewDayException("Post is Not Found", HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{recipeObjId}/posts/{postObjId}")
+    public ResponseEntity<IngredientInfo> updateRecipePostByObjId(@PathVariable("objId") String objId, @PathVariable("postObjId") String postObjId) throws BrewDayException {
+        LOG.info("Deleting RecipePost by ObjId");
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
+        Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+        List<RecipePost> recipePostList = recipeDb.getRecipePosts().stream().filter(t-> t.getObjId().equals(postObjId)).collect(Collectors.toList());
+        if (!recipePostList.isEmpty()){
+            recipePostList.remove(recipePostList.get(0));
+            recipeService.saveOrUpdate(recipeDb);
+            return new ResponseEntity(new ResponseInfo("Recipe Post is Deleted", ResponseStatus.SUCCESS), HttpStatus.OK);
+        }
+        throw new BrewDayException("Post is Not Found", HttpStatus.NOT_FOUND);
+    }
+
 }
