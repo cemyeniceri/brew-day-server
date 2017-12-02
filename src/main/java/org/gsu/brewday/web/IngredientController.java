@@ -55,7 +55,9 @@ public class IngredientController {
     @RequestMapping(method = RequestMethod.GET, value = "/{objId}")
     public ResponseEntity<IngredientInfo> ingredientByObjId(@PathVariable("objId") String objId) throws BrewDayException {
         LOG.info("Getting Ingredient by ObjId");
-        return new ResponseEntity(modelMapper.map(ingredientService.findByObjId(objId).get(), IngredientInfo.class), HttpStatus.OK);
+        Optional<Ingredient> ingredientOpt = ingredientService.findByObjId(objId);
+        Ingredient ingredient = ingredientOpt.orElseThrow(()-> new BrewDayException("Ingredient is Not Found", HttpStatus.NOT_FOUND));
+        return new ResponseEntity(modelMapper.map(ingredient, IngredientInfo.class), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST)
