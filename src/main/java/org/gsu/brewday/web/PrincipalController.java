@@ -71,6 +71,12 @@ public class PrincipalController {
         String userName = principal.getUsername();
         if(StringUtils.hasText(userName)){
             principalDb.setUsername(userName.trim());
+            principalDb.setPassword(principal.getPassword());
+            principalDb.setEmail(principal.getEmail());
+            principalDb.setTitle(principal.getTitle());
+            principalDb.setName(principal.getName());
+            principalDb.setSurname(principal.getSurname());
+            principalDb.setGsm(principal.getGsm());
             principalService.saveOrUpdate(principalDb);
             return new ResponseEntity(new ResponseInfo("Principal is Updated", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
