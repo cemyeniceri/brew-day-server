@@ -17,22 +17,22 @@ import javax.persistence.Table;
 import java.io.Serializable;
 
 /**
- * Created by cyeniceri on 01/12/2017.
+ * Created by cyeniceri on 02/12/2017.
  */
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true, exclude = "principal")
-@ToString(exclude = "principal", callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "recipe")
+@ToString(exclude = "recipe", callSuper = true)
 @Entity
 @DynamicUpdate
 @DynamicInsert
 @SelectBeforeUpdate
-@Table(name = "INGREDIENTS")
+@Table(name = "RECIPES_INGREDIENTS")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "objId")
-public class Ingredient extends IngredientBase implements Serializable {
+public class RecipeIngredient extends IngredientBase implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "PRINCIPAL_OID", nullable = false)
-    private Principal principal;
+    @JoinColumn(name = "RECIPE_OID", nullable = false)
+    private Recipe recipe;
 }

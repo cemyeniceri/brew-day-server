@@ -10,29 +10,29 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.SelectBeforeUpdate;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
 /**
- * Created by cyeniceri on 01/12/2017.
+ * Created by cyeniceri on 02/12/2017.
  */
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true, exclude = "principal")
-@ToString(exclude = "principal", callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "recipe")
+@ToString(exclude = "recipe", callSuper = true)
 @Entity
 @DynamicUpdate
 @DynamicInsert
 @SelectBeforeUpdate
-@Table(name = "INGREDIENTS")
+@Table(name = "RECIPES_POSTS")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "objId")
-public class Ingredient extends IngredientBase implements Serializable {
+public class RecipePost extends AbstractEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    @Column(name = "POST")
+    private String post;
+
     @ManyToOne(optional = false)
-    @JoinColumn(name = "PRINCIPAL_OID", nullable = false)
-    private Principal principal;
+    @JoinColumn(name = "RECIPE_OID", nullable = false)
+    private Recipe recipe;
 }
