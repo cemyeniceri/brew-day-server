@@ -34,7 +34,7 @@ public class PrincipalController {
 
     private final PrincipalService principalService;
 
-    @RequestMapping(value = "login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
     public LoginResponse login(@RequestBody final PrincipalLogin principalLogin) {
         LOG.info("Login request: {}", principalLogin);
         Principal principal = principalService.findByUsernameAndPassword(principalLogin.getUsername(), principalLogin.getPassword())
