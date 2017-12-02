@@ -59,10 +59,15 @@ public class IngredientController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<ResponseInfo> create(@RequestBody Ingredient ingredient) throws BrewDayException {
+    public ResponseEntity<ResponseInfo> create(@RequestBody Ingredient ingredient, final HttpServletRequest request) throws BrewDayException {
+        final Claims claims = (Claims) request.getAttribute("claims");
+        String principalOid = (String) claims.get("oid");
+        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
+        Principal principal = principalOpt.orElseThrow(()-> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
         LOG.info("Create Ingredient : {}", ingredient);
         String ingredientName = ingredient.getName();
         if(StringUtils.hasText(ingredientName)){
+            ingredient.setPrincipal(principal);
             ingredient.setName(ingredientName.trim());
             ingredientService.saveOrUpdate(ingredient);
             return new ResponseEntity(new ResponseInfo("Ingredient is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
