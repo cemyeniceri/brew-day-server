@@ -55,7 +55,7 @@ public class IngredientController {
     @RequestMapping(method = RequestMethod.GET, value = "/{objId}")
     public ResponseEntity<IngredientInfo> ingredientByObjId(@PathVariable("objId") String objId) throws BrewDayException {
         LOG.info("Getting Ingredient by ObjId");
-        return new ResponseEntity(ingredientService.findByObjId(objId), HttpStatus.OK);
+        return new ResponseEntity(modelMapper.map(ingredientService.findByObjId(objId).get(), IngredientInfo.class), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST)
