@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * Created by cyeniceri on 04/02/2017.
  */
-@Component("mbrPrincipalService")
+@Component("principalService")
 @Transactional
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PrincipalServiceImpl implements PrincipalService {
