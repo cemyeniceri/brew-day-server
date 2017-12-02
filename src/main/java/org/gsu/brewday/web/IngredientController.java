@@ -78,6 +78,9 @@ public class IngredientController {
         String ingredientName = ingredient.getName();
         if(StringUtils.hasText(ingredientName)){
             ingredientDb.setName(ingredientName.trim());
+            ingredientDb.setAmount(ingredient.getAmount());
+            ingredientDb.setType(ingredient.getType());
+            ingredientDb.setUnit(ingredient.getUnit());
             ingredientService.saveOrUpdate(ingredientDb);
             return new ResponseEntity(new ResponseInfo("Ingredient is Updated", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
