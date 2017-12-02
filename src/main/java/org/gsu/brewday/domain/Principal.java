@@ -20,8 +20,8 @@ import java.util.Set;
  */
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true, exclude = {"ingredients", "recipes"})
-@ToString(exclude = {"ingredients", "recipes"}, callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"ingredients", "recipes", "shopLists"})
+@ToString(exclude = {"ingredients", "recipes", "shopLists"}, callSuper = true)
 @Entity
 @DynamicUpdate
 @DynamicInsert
@@ -57,4 +57,7 @@ public class Principal extends AbstractEntity implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "principal", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Recipe> recipes = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "principal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ShopList> shopLists = new HashSet<>();
 }
