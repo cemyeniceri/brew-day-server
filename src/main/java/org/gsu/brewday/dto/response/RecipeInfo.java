@@ -7,6 +7,4 @@ public class RecipeInfo {
     private String name;
     private String detail;
     private String objId;
-    private RecipePostInfo recipePostInfo;
-    private IngredientInfo ingredientInfo;
 }

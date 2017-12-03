@@ -2,10 +2,7 @@ package org.gsu.brewday.web;
 
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.gsu.brewday.domain.Principal;
-import org.gsu.brewday.domain.Recipe;
-import org.gsu.brewday.domain.RecipeIngredient;
-import org.gsu.brewday.domain.RecipePost;
+import org.gsu.brewday.domain.*;
 import org.gsu.brewday.dto.response.*;
 import org.gsu.brewday.dto.response.ResponseStatus;
 import org.gsu.brewday.exception.BrewDayException;
@@ -23,8 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -145,7 +142,7 @@ public class RecipeController {
         if (!recipePostList.isEmpty()){
             recipePostList.get(0).setPost(recipePost.getPost());
             recipeService.saveOrUpdate(recipeDb);
-            return new ResponseEntity(new ResponseInfo("Recipe Post is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
+            return new ResponseEntity(new ResponseInfo("Recipe Post is Updated", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
         throw new BrewDayException("Post is Not Found", HttpStatus.NOT_FOUND);
     }
@@ -157,7 +154,7 @@ public class RecipeController {
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipePost> recipePostList = recipeDb.getRecipePosts().stream().filter(t-> t.getObjId().equals(postObjId)).collect(Collectors.toList());
         if (!recipePostList.isEmpty()){
-            recipePostList.remove(recipePostList.get(0));
+            recipeDb.getRecipePosts().remove(recipePostList.get(0));
             recipeService.saveOrUpdate(recipeDb);
             return new ResponseEntity(new ResponseInfo("Recipe Post is Deleted", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
@@ -210,7 +207,7 @@ public class RecipeController {
             recipeIngredientDb.setType(recipeIngredient.getType());
             recipeIngredientDb.setUnit(recipeIngredient.getUnit());
             recipeService.saveOrUpdate(recipeDb);
-            return new ResponseEntity(new ResponseInfo("Recipe Ingredient is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
+            return new ResponseEntity(new ResponseInfo("Recipe Ingredient is Updated", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
         throw new BrewDayException("Ingredient is Not Found", HttpStatus.NOT_FOUND);
     }
@@ -222,11 +219,49 @@ public class RecipeController {
         Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
         List<RecipeIngredient> recipeIngredientList = recipeDb.getRecipeIngredients().stream().filter(t-> t.getObjId().equals(ingredientObjId)).collect(Collectors.toList());
         if (!recipeIngredientList.isEmpty()){
-            recipeIngredientList.remove(recipeIngredientList.get(0));
+            recipeDb.getRecipeIngredients().remove(recipeIngredientList.get(0));
             recipeService.saveOrUpdate(recipeDb);
             return new ResponseEntity(new ResponseInfo("Recipe Ingredient is Deleted", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
         throw new BrewDayException("Ingredient is Not Found", HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/check")
+    public ResponseEntity<Map<String, Boolean>> checkIsRecipeAvailableByObjId(@PathVariable("recipeObjId") String recipeObjId, final HttpServletRequest request) throws BrewDayException {
+        final Claims claims = (Claims) request.getAttribute("claims");
+        String principalOid = (String) claims.get("oid");
+        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
+        Principal principal = principalOpt.orElseThrow(()-> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+        LOG.info("Listing ingredients by principal.");
+
+        Map<String, Boolean> availabilityMap = new HashMap<>();
+
+        Set<Ingredient> ingredientSet = principal.getIngredients();
+        if(ingredientSet.isEmpty()){
+            throw new BrewDayException("You haven't any ingredients in your stock!!", HttpStatus.NOT_FOUND);
+        }else{
+
+            Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
+            Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+            Set<RecipeIngredient> recipeIngredientSet = recipeDb.getRecipeIngredients();
+
+            if (!recipeIngredientSet.isEmpty()){
+                LOG.info("Checking Recipe by ObjId");
+                for (RecipeIngredient recipeIngredient : recipeIngredientSet) {
+                    Set<Ingredient> filteredSet = ingredientSet.stream().filter(ing->
+                        ing.getName().equalsIgnoreCase(recipeIngredient.getName())
+                                && ing.getType().equalsIgnoreCase(recipeIngredient.getType())
+                                && new BigDecimal(ing.getAmount()).compareTo(new BigDecimal(recipeIngredient.getAmount())) >= 0
+                    ).collect(Collectors.toSet());
+
+                    availabilityMap.put(recipeIngredient.getObjId() ,!filteredSet.isEmpty());
+                }
+
+                return new ResponseEntity(availabilityMap, HttpStatus.OK);
+            }else{
+                throw new BrewDayException("Recipe Ingredient List is Empty", HttpStatus.NOT_FOUND);
+            }
+        }
     }
 
 }
