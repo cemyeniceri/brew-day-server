@@ -256,7 +256,6 @@ public class RecipeController {
 
                     availabilityMap.put(recipeIngredient.getObjId() ,!filteredSet.isEmpty());
                 }
-
                 return new ResponseEntity(availabilityMap, HttpStatus.OK);
             }else{
                 throw new BrewDayException("Recipe Ingredient List is Empty", HttpStatus.NOT_FOUND);
