@@ -152,7 +152,7 @@ public class ShopListController {
         ShopList shopListDb = shopListOpt.orElseThrow(() -> new BrewDayException("Shop List is Not Found", HttpStatus.NOT_FOUND));
         List<ShopListIngredient> shopListIngredientList = shopListDb.getShopListIngredients().stream().filter(t-> t.getObjId().equals(ingredientObjId)).collect(Collectors.toList());
         if (!shopListIngredientList.isEmpty()){
-            shopListIngredientList.remove(shopListIngredientList.get(0));
+            shopListDb.getShopListIngredients().remove(shopListIngredientList.get(0));
             shopListService.saveOrUpdate(shopListDb);
             return new ResponseEntity(new ResponseInfo("Shop List Ingredient is Deleted", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
