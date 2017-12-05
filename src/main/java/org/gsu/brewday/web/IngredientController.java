@@ -42,10 +42,7 @@ public class IngredientController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<IngredientInfo>> ingredientList(final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(()-> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Listing ingredients by principal.");
         Type listType = new TypeToken<List<IngredientInfo>>() {}.getType();
         List<IngredientInfo> ingredientInfoList = modelMapper.map(principal.getIngredients(), listType);
@@ -62,10 +59,7 @@ public class IngredientController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ResponseInfo> create(@RequestBody Ingredient ingredient, final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(()-> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Create Ingredient : {}", ingredient);
         String ingredientName = ingredient.getName();
         if(StringUtils.hasText(ingredientName)){

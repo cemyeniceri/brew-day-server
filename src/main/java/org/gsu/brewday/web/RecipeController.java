@@ -40,10 +40,8 @@ public class RecipeController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<RecipeInfo>> recipeList(final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(() -> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Listing recipes by principal.");
         Type listType = new TypeToken<List<RecipeInfo>>() {
         }.getType();
@@ -61,10 +59,8 @@ public class RecipeController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ResponseInfo> create(@RequestBody Recipe recipe, final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(() -> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Create Recipe : {}", recipe);
         String recipeName = recipe.getName();
         if (StringUtils.hasText(recipeName)) {
@@ -227,15 +223,10 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{recipeObjId}/check")
-    public ResponseEntity<Map<String, Boolean>> checkIsRecipeAvailableByObjId(@PathVariable("recipeObjId") String recipeObjId, final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(()-> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+    public ResponseEntity<Map<String, ShopListCheckIngredientInfo>> checkIsRecipeAvailableByObjId(@PathVariable("recipeObjId") String recipeObjId, final HttpServletRequest request) throws BrewDayException {
+
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Listing ingredients by principal.");
-
-        Map<String, Boolean> availabilityMap = new HashMap<>();
-
         Set<Ingredient> ingredientSet = principal.getIngredients();
         if(ingredientSet.isEmpty()){
             throw new BrewDayException("You haven't any ingredients in your stock!!", HttpStatus.NOT_FOUND);
@@ -247,14 +238,26 @@ public class RecipeController {
 
             if (!recipeIngredientSet.isEmpty()){
                 LOG.info("Checking Recipe by ObjId");
+
+                Map<String, ShopListCheckIngredientInfo> availabilityMap = new HashMap<>();
                 for (RecipeIngredient recipeIngredient : recipeIngredientSet) {
-                    Set<Ingredient> filteredSet = ingredientSet.stream().filter(ing->
+                    ShopListCheckIngredientInfo shopListCheckIngredientInfo = new ShopListCheckIngredientInfo();
+
+                    List<Ingredient> filteredList = ingredientSet.stream().filter(ing->
                         ing.getName().equalsIgnoreCase(recipeIngredient.getName())
                                 && ing.getType().equalsIgnoreCase(recipeIngredient.getType())
-                                && new BigDecimal(ing.getAmount()).compareTo(new BigDecimal(recipeIngredient.getAmount())) >= 0
-                    ).collect(Collectors.toSet());
+                    ).collect(Collectors.toList());
 
-                    availabilityMap.put(recipeIngredient.getObjId() ,!filteredSet.isEmpty());
+                    if(!filteredList.isEmpty()){
+                        BigDecimal difference = new BigDecimal(filteredList.get(0).getAmount()).subtract(new BigDecimal(recipeIngredient.getAmount()));
+                        shopListCheckIngredientInfo.setState(difference.compareTo(BigDecimal.ZERO) >= 0);
+                        shopListCheckIngredientInfo.setAmount(shopListCheckIngredientInfo.getState() ? "0" : difference.abs().toString());
+                    }else{
+                        shopListCheckIngredientInfo.setState(Boolean.FALSE);
+                        shopListCheckIngredientInfo.setAmount(recipeIngredient.getAmount());
+                    }
+
+                    availabilityMap.put(recipeIngredient.getObjId() ,shopListCheckIngredientInfo);
                 }
                 return new ResponseEntity(availabilityMap, HttpStatus.OK);
             }else{

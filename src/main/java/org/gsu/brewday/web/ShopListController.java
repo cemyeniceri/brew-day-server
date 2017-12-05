@@ -41,10 +41,7 @@ public class ShopListController {
 
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ShopListInfo>> shopLists(final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(() -> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Listing Shop Lists by principal.");
         Type listType = new TypeToken<List<ShopListInfo>>() {
         }.getType();
@@ -62,10 +59,7 @@ public class ShopListController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ResponseInfo> create(@RequestBody ShopList shopList, final HttpServletRequest request) throws BrewDayException {
-        final Claims claims = (Claims) request.getAttribute("claims");
-        String principalOid = (String) claims.get("oid");
-        Optional<Principal> principalOpt = principalService.findByObjId(principalOid);
-        Principal principal = principalOpt.orElseThrow(() -> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+        Principal principal = principalService.userLoggedOn(request);
         LOG.info("Create Shop List : {}", shopList);
         String shopListName = shopList.getName();
         if (StringUtils.hasText(shopListName)) {
@@ -124,7 +118,7 @@ public class ShopListController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/{shopListObjId}/ingredients")
     public ResponseEntity<ResponseInfo> createShopListIngredientByObjId(@PathVariable("shopListObjId") String shopListObjId, @RequestBody ShopListIngredient shopListIngredient) throws BrewDayException {
-        LOG.info("Creating Recipe Ingredient by ObjId");
+        LOG.info("Creating Shop Ingredient by ObjId");
         Optional<ShopList> shopListOpt = shopListService.findByObjId(shopListObjId);
         ShopList shopListDb = shopListOpt.orElseThrow(() -> new BrewDayException("Shop List is Not Found", HttpStatus.NOT_FOUND));
         shopListIngredient.setShopList(shopListDb);

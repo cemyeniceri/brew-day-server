@@ -1,5 +1,6 @@
 package org.gsu.brewday.service.impl;
 
+import io.jsonwebtoken.Claims;
 import org.gsu.brewday.domain.Principal;
 import org.gsu.brewday.domain.repository.PrincipalRepository;
 import org.gsu.brewday.dto.response.PrincipalInfo;
@@ -8,9 +9,11 @@ import org.gsu.brewday.service.PrincipalService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,6 +28,14 @@ public class PrincipalServiceImpl implements PrincipalService {
 
     private final PrincipalRepository principalRepository;
     private final ModelMapper modelMapper;
+
+    @Override
+    public Principal userLoggedOn(HttpServletRequest request){
+        final Claims claims = (Claims) request.getAttribute("claims");
+        String principalOid = (String) claims.get("oid");
+        Optional<Principal> principalOpt = findByObjId(principalOid);
+        return principalOpt.orElseThrow(() -> new BrewDayException("Principal is Not Found", HttpStatus.NOT_FOUND));
+    }
 
     @Override
     public List<PrincipalInfo> findAll() {

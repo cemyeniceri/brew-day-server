@@ -3,6 +3,7 @@ package org.gsu.brewday.service;
 import org.gsu.brewday.domain.Principal;
 import org.gsu.brewday.dto.response.PrincipalInfo;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ public interface PrincipalService {
     Optional<Principal> findByObjId(String objId);
 
     void delete(Principal principal);
+
+    Principal userLoggedOn(HttpServletRequest request);
 }
 
 
