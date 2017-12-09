@@ -1,6 +1,5 @@
 package org.gsu.brewday.web;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.gsu.brewday.domain.*;
 import org.gsu.brewday.dto.response.*;
@@ -50,7 +49,7 @@ public class RecipeController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{objId}")
-    public ResponseEntity<IngredientInfo> recipeByObjId(@PathVariable("objId") String objId) throws BrewDayException {
+    public ResponseEntity<RecipeInfo> recipeByObjId(@PathVariable("objId") String objId) throws BrewDayException {
         LOG.info("Getting Recipe by ObjId");
         Optional<Recipe> recipeOpt = recipeService.findByObjId(objId);
         Recipe recipe = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));

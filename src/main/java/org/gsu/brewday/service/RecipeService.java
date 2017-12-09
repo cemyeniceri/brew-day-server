@@ -1,7 +1,9 @@
 package org.gsu.brewday.service;
 
 import org.gsu.brewday.domain.Recipe;
+import org.gsu.brewday.dto.response.RecipeInfo;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -10,6 +12,8 @@ import java.util.Optional;
 public interface RecipeService {
 
     Recipe saveOrUpdate(Recipe recipe);
+
+    List<RecipeInfo> findAll();
 
     Optional<Recipe> findByObjId(String objId);
 
