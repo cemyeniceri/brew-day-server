@@ -68,6 +68,9 @@ public class ShopListController {
         String shopListName = shopList.getName();
         if (StringUtils.hasText(shopListName)) {
             shopList.setPrincipal(principal);
+            for (ShopListIngredient shopListIngredient: shopList.getShopListIngredients()){
+                shopListIngredient.setShopList(shopList);
+            }
             shopList.setName(shopListName.trim());
             shopListService.saveOrUpdate(shopList);
             return new ResponseEntity(new ResponseInfo("Shop List is Created", ResponseStatus.SUCCESS), HttpStatus.OK);
