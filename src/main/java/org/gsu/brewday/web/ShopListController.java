@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -185,7 +186,7 @@ public class ShopListController {
                 ).collect(Collectors.toList());
 
                 if(!userIngListFiltered.isEmpty()){
-                    userIngListFiltered.get(0).setAmount(shopListIngredient.getAmount());
+                    userIngListFiltered.get(0).setAmount(new BigDecimal(userIngListFiltered.get(0).getAmount()).add(new BigDecimal(shopListIngredient.getAmount())).toString());
                 }else{
                     Ingredient newIngredient = new Ingredient();
                     newIngredient.setPrincipal(principal);
