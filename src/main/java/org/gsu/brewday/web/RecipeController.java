@@ -227,41 +227,37 @@ public class RecipeController {
         Principal principal = principalService.userLoggedOn(request);
         LOG.info("Listing ingredients by principal.");
         Set<Ingredient> ingredientSet = principal.getIngredients();
-        if(ingredientSet.isEmpty()){
-            throw new BrewDayException("You haven't any ingredients in your stock!!", HttpStatus.NOT_FOUND);
-        }else{
 
-            Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
-            Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
-            Set<RecipeIngredient> recipeIngredientSet = recipeDb.getRecipeIngredients();
+        Optional<Recipe> recipeOpt = recipeService.findByObjId(recipeObjId);
+        Recipe recipeDb = recipeOpt.orElseThrow(() -> new BrewDayException("Recipe is Not Found", HttpStatus.NOT_FOUND));
+        Set<RecipeIngredient> recipeIngredientSet = recipeDb.getRecipeIngredients();
 
-            if (!recipeIngredientSet.isEmpty()){
-                LOG.info("Checking Recipe by ObjId");
+        if (!recipeIngredientSet.isEmpty()){
+            LOG.info("Checking Recipe by ObjId");
 
-                Map<String, ShopListCheckIngredientInfo> availabilityMap = new HashMap<>();
-                for (RecipeIngredient recipeIngredient : recipeIngredientSet) {
-                    ShopListCheckIngredientInfo shopListCheckIngredientInfo = new ShopListCheckIngredientInfo();
+            Map<String, ShopListCheckIngredientInfo> availabilityMap = new HashMap<>();
+            for (RecipeIngredient recipeIngredient : recipeIngredientSet) {
+                ShopListCheckIngredientInfo shopListCheckIngredientInfo = new ShopListCheckIngredientInfo();
 
-                    List<Ingredient> filteredList = ingredientSet.stream().filter(ing->
-                        ing.getName().equalsIgnoreCase(recipeIngredient.getName())
-                                && ing.getType().equalsIgnoreCase(recipeIngredient.getType())
-                    ).collect(Collectors.toList());
+                List<Ingredient> filteredList = ingredientSet.stream().filter(ing->
+                    ing.getName().equalsIgnoreCase(recipeIngredient.getName())
+                            && ing.getType().equalsIgnoreCase(recipeIngredient.getType())
+                ).collect(Collectors.toList());
 
-                    if(!filteredList.isEmpty()){
-                        BigDecimal difference = new BigDecimal(filteredList.get(0).getAmount()).subtract(new BigDecimal(recipeIngredient.getAmount()));
-                        shopListCheckIngredientInfo.setState(difference.compareTo(BigDecimal.ZERO) >= 0);
-                        shopListCheckIngredientInfo.setAmount(shopListCheckIngredientInfo.getState() ? "0" : difference.abs().toString());
-                    }else{
-                        shopListCheckIngredientInfo.setState(Boolean.FALSE);
-                        shopListCheckIngredientInfo.setAmount(recipeIngredient.getAmount());
-                    }
-
-                    availabilityMap.put(recipeIngredient.getObjId() ,shopListCheckIngredientInfo);
+                if(!filteredList.isEmpty()){
+                    BigDecimal difference = new BigDecimal(filteredList.get(0).getAmount()).subtract(new BigDecimal(recipeIngredient.getAmount()));
+                    shopListCheckIngredientInfo.setState(difference.compareTo(BigDecimal.ZERO) >= 0);
+                    shopListCheckIngredientInfo.setAmount(shopListCheckIngredientInfo.getState() ? "0" : difference.abs().toString());
+                }else{
+                    shopListCheckIngredientInfo.setState(Boolean.FALSE);
+                    shopListCheckIngredientInfo.setAmount(recipeIngredient.getAmount());
                 }
-                return new ResponseEntity(availabilityMap, HttpStatus.OK);
-            }else{
-                throw new BrewDayException("Recipe Ingredient List is Empty", HttpStatus.NOT_FOUND);
+
+                availabilityMap.put(recipeIngredient.getObjId() ,shopListCheckIngredientInfo);
             }
+            return new ResponseEntity(availabilityMap, HttpStatus.OK);
+        }else{
+            throw new BrewDayException("Recipe Ingredient List is Empty", HttpStatus.NOT_FOUND);
         }
     }
 

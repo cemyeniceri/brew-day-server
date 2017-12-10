@@ -1,13 +1,16 @@
 package org.gsu.brewday.web;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.gsu.brewday.domain.*;
-import org.gsu.brewday.dto.response.*;
+import org.gsu.brewday.domain.Ingredient;
+import org.gsu.brewday.domain.Principal;
+import org.gsu.brewday.domain.ShopList;
+import org.gsu.brewday.domain.ShopListIngredient;
+import org.gsu.brewday.dto.response.IngredientInfo;
+import org.gsu.brewday.dto.response.ResponseInfo;
 import org.gsu.brewday.dto.response.ResponseStatus;
+import org.gsu.brewday.dto.response.ShopListInfo;
 import org.gsu.brewday.exception.BrewDayException;
 import org.gsu.brewday.service.PrincipalService;
-import org.gsu.brewday.service.RecipeService;
 import org.gsu.brewday.service.ShopListService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -23,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -157,6 +161,43 @@ public class ShopListController {
             return new ResponseEntity(new ResponseInfo("Shop List Ingredient is Deleted", ResponseStatus.SUCCESS), HttpStatus.OK);
         }
         throw new BrewDayException("Ingredient is Not Found", HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{shopListObjId}/done")
+    public ResponseEntity<ResponseInfo> doneShopListByObjId(@PathVariable("shopListObjId") String shopListObjId, final HttpServletRequest request) throws BrewDayException {
+        LOG.info("Deleting Shop List and Updating Ingredient");
+        Optional<ShopList> shopListOpt = shopListService.findByObjId(shopListObjId);
+        ShopList shopListDb = shopListOpt.orElseThrow(() -> new BrewDayException("Shop List is Not Found", HttpStatus.NOT_FOUND));
+
+        if(!shopListDb.getShopListIngredients().isEmpty()){
+
+            Principal principal = principalService.userLoggedOn(request);
+            Set<Ingredient> userIngredients = principal.getIngredients();
+
+            for (ShopListIngredient shopListIngredient :shopListDb.getShopListIngredients()){
+
+                List<Ingredient> userIngListFiltered = userIngredients.stream().filter(usrIng ->
+                        usrIng.getName().equalsIgnoreCase(shopListIngredient.getName())
+                                && usrIng.getType().equalsIgnoreCase(shopListIngredient.getType())
+                ).collect(Collectors.toList());
+
+                if(!userIngListFiltered.isEmpty()){
+                    userIngListFiltered.get(0).setAmount(shopListIngredient.getAmount());
+                }else{
+                    Ingredient newIngredient = new Ingredient();
+                    newIngredient.setPrincipal(principal);
+                    newIngredient.setAmount(shopListIngredient.getAmount());
+                    newIngredient.setUnit(shopListIngredient.getUnit());
+                    newIngredient.setType(shopListIngredient.getType());
+                    newIngredient.setName(shopListIngredient.getName());
+                    principal.getIngredients().add(newIngredient);
+                }
+            }
+            principalService.saveOrUpdate(principal);
+        }
+
+        shopListService.delete(shopListDb);
+        return new ResponseEntity(new ResponseInfo("Shop List Done Operation is finished successfully", ResponseStatus.SUCCESS), HttpStatus.OK);
     }
 
 }
