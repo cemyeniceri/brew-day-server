@@ -1,7 +1,10 @@
 package org.gsu.brewday;
 
+import org.gsu.brewday.domain.Recipe;
+import org.gsu.brewday.dto.response.RecipeInfo;
 import org.gsu.brewday.filter.AuthenticationFilter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -29,6 +32,15 @@ public class Application extends WebMvcConfigurerAdapter {
 
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
+
+        PropertyMap<Recipe, RecipeInfo> recipeMap = new PropertyMap<Recipe, RecipeInfo>() {
+            protected void configure() {
+                map().setPrincipal(source.getPrincipal().getObjId());
+            }
+        };
+
+        modelMapper.addMappings(recipeMap);
+        return modelMapper;
     }
 }

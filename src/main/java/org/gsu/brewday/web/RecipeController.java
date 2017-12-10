@@ -263,7 +263,7 @@ public class RecipeController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/what-should-i-brew-today")
-    public ResponseEntity<Map<String, PublicRecipeInfo>> whatShouldIBrewToday(final HttpServletRequest request) throws BrewDayException {
+    public ResponseEntity<Map<String, RecipeInfo>> whatShouldIBrewToday(final HttpServletRequest request) throws BrewDayException {
 
         Principal principal = principalService.userLoggedOn(request);
         LOG.info("Listing ingredients by principal.");
@@ -272,7 +272,7 @@ public class RecipeController {
 
         if (!recipeList.isEmpty()){
             LOG.info("Checking Recipes");
-            Map<String, PublicRecipeInfo> availabilityMap = new HashMap<>();
+            Map<String, RecipeInfo> availabilityMap = new HashMap<>();
 
             for (Recipe recipe : recipeList) {
                 Set<RecipeIngredient> recipeIngredientSet = recipe.getRecipeIngredients();
@@ -290,14 +290,8 @@ public class RecipeController {
                         break;
                     }
                 }
-                if(state){
-                    PublicRecipeInfo publicRecipeInfo = new PublicRecipeInfo();
-                    publicRecipeInfo.setObjId(recipe.getObjId());
-                    publicRecipeInfo.setIsImport(!recipe.getPrincipal().getObjId().equals(principal.getObjId()));
-                    publicRecipeInfo.setDetail(recipe.getDetail());
-                    publicRecipeInfo.setName(recipe.getName());
-                    availabilityMap.put(recipe.getObjId(), modelMapper.map(publicRecipeInfo, PublicRecipeInfo.class));
-                }
+                if(state)
+                    availabilityMap.put(recipe.getObjId(), modelMapper.map(recipe, RecipeInfo.class));
             }
             return new ResponseEntity(availabilityMap, HttpStatus.OK);
         }else{

@@ -5,6 +5,7 @@ import org.gsu.brewday.domain.Principal;
 import org.gsu.brewday.domain.Recipe;
 import org.gsu.brewday.domain.RecipeIngredient;
 import org.gsu.brewday.domain.RecipePost;
+import org.gsu.brewday.dto.response.PublicRecipeInfo;
 import org.gsu.brewday.dto.response.RecipeInfo;
 import org.gsu.brewday.dto.response.ResponseInfo;
 import org.gsu.brewday.dto.response.ResponseStatus;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by cyeniceri on 02/12/2017.
@@ -39,11 +41,19 @@ public class PublicRecipeController {
     private final PrincipalService principalService;
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<RecipeInfo>> recipeList() throws BrewDayException {
-
+    public ResponseEntity<List<PublicRecipeInfo>> recipeList(final HttpServletRequest request) throws BrewDayException {
+        Principal principal = principalService.userLoggedOn(request);
         List<RecipeInfo> recipeInfoList = recipeService.findAll();
+        List<PublicRecipeInfo> publicRecipeInfoList = recipeInfoList.stream().map(t->{
+            PublicRecipeInfo publicRecipeInfo = new PublicRecipeInfo();
+            publicRecipeInfo.setObjId(t.getObjId());
+            publicRecipeInfo.setName(t.getName());
+            publicRecipeInfo.setDetail(t.getDetail());
+            publicRecipeInfo.setIsImport(!t.getPrincipal().equals(principal.getObjId()));
+            return publicRecipeInfo;
+        }).collect(Collectors.toList());
         LOG.info("Listing public recipes.");
-        return new ResponseEntity<>(recipeInfoList, HttpStatus.OK);
+        return new ResponseEntity<>(publicRecipeInfoList, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{objId}")

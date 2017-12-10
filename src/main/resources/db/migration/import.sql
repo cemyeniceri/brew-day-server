@@ -1,1 +1,0 @@
-insert into principals(objid, username, password) values(sys_guid(), 'admin', 'password')
