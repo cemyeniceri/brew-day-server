@@ -261,4 +261,42 @@ public class RecipeController {
         }
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/what-should-i-brew-today")
+    public ResponseEntity<Map<String, String>> whatShouldIBrewToday(final HttpServletRequest request) throws BrewDayException {
+
+        Principal principal = principalService.userLoggedOn(request);
+        LOG.info("Listing ingredients by principal.");
+        Set<Ingredient> ingredientSet = principal.getIngredients();
+        Set<Recipe> recipeList = principal.getRecipes();
+
+        if (!recipeList.isEmpty()){
+            LOG.info("Checking Recipes");
+            Map<String, String> availabilityMap = new HashMap<>();
+
+            for (Recipe recipe : recipeList) {
+                Set<RecipeIngredient> recipeIngredientSet = recipe.getRecipeIngredients();
+                boolean state = true;
+                for (RecipeIngredient recipeIngredient: recipeIngredientSet){
+
+                    List<Ingredient> filteredList = ingredientSet.stream().filter(ing->
+                            ing.getName().equalsIgnoreCase(recipeIngredient.getName())
+                                    && ing.getType().equalsIgnoreCase(recipeIngredient.getType())
+                                    && new BigDecimal(ing.getAmount()).subtract(new BigDecimal(recipeIngredient.getAmount())).compareTo(BigDecimal.ZERO) >= 0
+                    ).collect(Collectors.toList());
+
+                    if (filteredList.isEmpty()){
+                        state = false;
+                        break;
+                    }
+                }
+                if(state)
+                    availabilityMap.put(recipe.getObjId(), recipe.getName());
+            }
+            return new ResponseEntity(availabilityMap, HttpStatus.OK);
+        }else{
+            throw new BrewDayException("Any Recipe not Found", HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
