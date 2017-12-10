@@ -296,7 +296,7 @@ public class RecipeController {
                     publicRecipeInfo.setIsImport(!recipe.getPrincipal().getObjId().equals(principal.getObjId()));
                     publicRecipeInfo.setDetail(recipe.getDetail());
                     publicRecipeInfo.setName(recipe.getName());
-                    availabilityMap.put(recipe.getObjId(), modelMapper.map(recipe, PublicRecipeInfo.class));
+                    availabilityMap.put(recipe.getObjId(), modelMapper.map(publicRecipeInfo, PublicRecipeInfo.class));
                 }
             }
             return new ResponseEntity(availabilityMap, HttpStatus.OK);
