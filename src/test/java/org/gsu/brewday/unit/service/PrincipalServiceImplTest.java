@@ -1,6 +1,7 @@
 package org.gsu.brewday.unit.service;
 
 
+import io.jsonwebtoken.Claims;
 import org.gsu.brewday.domain.Principal;
 import org.gsu.brewday.domain.repository.PrincipalRepository;
 import org.gsu.brewday.dto.response.PrincipalInfo;
@@ -17,11 +18,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -116,6 +120,16 @@ public class PrincipalServiceImplTest {
 
 
         Principal p = principalService.saveOrUpdate(principal);
+        Assert.assertTrue(p.getObjId().equals("1"));
+    }
+
+    @Test
+    public void testUserLoggedOn(){
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        Claims claims = mock(Claims.class);
+        Mockito.when(httpServletRequest.getAttribute("claims")).thenReturn(claims);
+        Mockito.when(claims.get("oid")).thenReturn("1");
+        Principal p = principalService.userLoggedOn(httpServletRequest);
         Assert.assertTrue(p.getObjId().equals("1"));
     }
 }
